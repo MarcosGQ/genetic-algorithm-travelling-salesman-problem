@@ -1,0 +1,161 @@
+Problema: a empresa Kabum mandou apenas um caminhão fazer entregas de compras varias cidades de Goias 
+e precisa minimizar o tempo de entrega e gasto de combustivel, para minimizar custos tambem. 
+Para isso precisa de uma rota do centro de distribuição ate os locais de entrega, e depois, retornar 
+para o centro.
+
+--> apresentar o modelo matematico do caixeiro viajante
+--> pode ter problema de subrotas
+sub-rotas (ciclos que não contém todos os vértices do grafo)
+
+Tamanho da população: numero de cidades
+taxa de crossover:
+taxa de mutação:
+Evoluções: o numero de vezes que o algoritmo genetico irá rodar
+Complexidade: numero de possibilidades de caminhos
+
+O indivíduo muda de tamanho, seu cromossomo muda de tamanho dependendo do numero de cidades.
+Cada cidade é um gene no cromossomo. É um número dentro do cromossomo.
+
+/*  
+Trabalho Final Projeto e Analise de algoritmos II
+Resolução do Problema do Caixeiro Viajante
+Usando Metaheuristica Algoritmo Genético
+
+Apresentação: um slide para o problema que você decidiu resolver; 
+outro slide com o modelo matemático de programação linear inteira (ou binário); 
+outro slide com a execução da metaheurística apresentando o resultado como saída. 
+Observação: aquele que apresentar a metaheurística pela primeira vez, 
+terá outro slide para explicá-la.
+*/
+
+/* O que é o problema do caixeiro viajante?
+
+É um problema para determinar a melhor rota (menor caminho possível) para percorrer 
+uma série de cidades visitando cada uma apenas uma vez e depois retornando para 
+cidade de partida. É um problema da classe NP-completo.
+Complexidade= n(!nC), fatorial da quantidade de cidades.
+Exemplo: 3 cidades -> Complexidade= n(!3)= 6 -> 6 possibilidades de rotas distintas
+
+*/
+
+/* O que é Meta heurística?
+
+É um método heurístico (processos cognitivos para decisões não racionais, que 
+ignoram parte de uma informação para tomar uma decisão mais fácil e rápida)
+para resolver de forma genérica, problemas de otimização. Eles não são capazes
+de provar a otimalidade das suas soluções, mas oferecem soluçoes aceitaveis para
+problemas complexos e de grande porte.
+São aplicadas a problemas para os quais não se conhece um algoritmo eficiente 
+(resolução em tempo polinomial), ou seja, os problemas da classe NP e NP-completo.
+
+*/
+
+/* O que é o Algoritmo Genético?
+
+É do ramo dos algoritmos evolucionários. Usam técnicas de busca baseada em metáforas
+de processos biológicos, como a evolução. Combina a sobrevivência entre os melhores 
+como uma forma estruturada de troca de informações genéticas entre 2 indivíduos.
+Não é um processo de busca por uma solução ideal.
+
+Características:
+1- Indivíduo e sua representação cromossômica (quantidade de cidades, por exemplo)
+-> cada gene representa um objeto, e nesse caso, uma cidade
+2- População de indivíduos
+3- Função Fitness (avaliação dos indivíduos)
+4- Média da população (soma todas as qualidades dos indivíduos)
+5- Seleção de indivíduos para cruzamento (seleciona os mais aptos para cruzamento)
+6- Elitismo (seleciona os melhores da população velha para mantê-los na nova)
+7- Operador de cruzamento (cruzamento de genes para gerar novos indivíduos)
+8- Operador de Mutação (como faz a mutação dos genes)
+
+Passo a passo:
+1- Inicializar a população de indivíduos
+2- Avaliar cada indivíduo
+-> Pode aplicar Elitismo: escolher indivíduos e mantê-lo na futura configuração
+3- Selecionar os pais para gerar novos indivíduos
+-> 2 pais geram 2 filhos
+4- Aplicar os operadores de recombinação (Crossover e Mutação)
+-> pode optar por mutação nos filhos
+5- Apagar os velhos indivíduos
+6- Reavaliar os novos indivíduos e coloca-os na população
+-> forma nova população com os indivíduos gerados por pais e pelo "salvos" pelo
+elitismo (se for aplicado)
+7- Se o tempo esgotar ou o melhor indivíduo satisfazer os requisitos e desempenho,
+retorne-o como resultado, caso contrário, volte ao passo 3.
+
+Função de aptidão
+
+F(x)= x*sen(10*pi*x)+1
+"x" é o resultado da representação cromossômica
+Essa função retorna o valor de "y", formando um grafo bidimensional.
+
+No caso do caixeiro viajante, a aptidão dos indivíduos será avaliada somando as 
+distâncias entre as cidades (a, b, c, d, e, ...).
+         n
+Fitness= E"somatório"(gene_n, gene_n+1)
+         n=0
+Fitness= distância(a,b) + distância(b,c) + distância(c,d) +... distância(n,n+1)
+Fitness= "x"metros (indivíduo com essa característica. Quanto menor "x", melhor)
+
+Média da população
+
+       n
+Média= E"somatório"Fitness / Tamanho da população
+       n=0                n
+Média= Somatório dos valores de aptidão de todos os indivíduos / Tamanho da população 
+
+Serve para verificar se a população está evoluindo, se o problema está minimizando
+ou maximizando. Também serve como critério de parada do problema.
+
+Métodos de seleção / camadas de seleção
+
+Roleta viciada e Torneio
+
+Torneio: escolhe 'n' individuos de uma populacao e pega o individuo com melhor fitness
+
+Elitismo
+
+1- Ordena a população anterior, do melhor para o pior
+2- seleciona "x" indivíduos para permanecer na nova população
+3- eles substituirao os piores individuos da nova populacao
+
+Cruzamento (Crossover)
+
+Troca de características entre indivíduos
+Ponto de cruzamento: todas as características até esse ponto "x" são enviadas para o
+novo indivíduo.
+
+obs.: individuos que nao passam pela taxa de cruzamento, continuam na populacao
+e passam pela avaliacao de mutacao, se falharem nessa, sao descartados
+
+Algoritmo PMX (partial mapped crossover)
+-> cruzamento de indivíduos com características alfa numéricas (não binários)
+-> mais complexo de implementar em relação ao crossover binário
+-> ponto de cruzamento é em faixa: de "x" a "y"
+-> uma parte da sequencia de um dos pais é mapeada a uma parte da sequencia de outro pai
+   e preservada no filho. Os genes restantes são trocados entre os pais.
+-> para o problema do caixeiro viajante, é preciso certificar que o novo indivíduo
+   não possui características repetidas, para isso usa-se uma tabela auxiliar
+-> a tabela auxiliar vai relacionar os valores de cada faixa e aonde tiver uma
+   característica repetida, ela será substituída pela característica relacionada
+   que pertence ao outro indivíduo gerado. E vice-versa.   
+-> A FAIXA A SER TROCADA SERÁ A QUE NÃO FOI ALTERADA PELO CROSSOVER   
+
+Taxa de cruzamento
+-> pela literatura, é de 0.6 (60% dos indivíduos são selecionados pelo cruzamento)
+-> ao selecionar 2 indivíduos para cruzamento, é gerado um número aleatórios (0 a 1)
+   se esse número estiver nessa faixa de seleção (menor ou igual a 0.6), então ele é
+   selecionado para cruzamento. Senão, por elitismo, passará direto para nova população
+
+Mutação por troca (swap)
+-> alteração do gene do indivíduo   
+-> escolhe aleatóriamente 2 pontos para troca, mas: 1- os pontos não podem ser iguais
+   e 2- o primeiro ponto não pode ser maior que o segundo.
+
+Taxa de mutação
+-> os indivíduos que não passaram pelo cruzamento podem sofrer mutação
+-> cria um valor aleatório de 0 a 1, se for menor ou igual a 0.01, sofrerá mutação
+
+critério de parada = quantidade de evoluções e por fim, seleciona o melhor fitness da população
+
+*/
